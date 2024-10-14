@@ -98,17 +98,17 @@ const CounterComponent = () => {
     });
   };
 
-  // Modify only the selected files.
+  // Handle file modification.
   const handleModifyFiles = async () => {
     if (selectedFiles.size === 0) {
       return; // Do nothing if no files are selected.
     }
     const selectedFilePaths = Array.from(selectedFiles);
-    await modifySelectedFiles(selectedFilePaths, files); // Modify only the selected files.
-    await replaceFilesInIndexedDB("files", files, addLog); // Update the files in IndexedDB after modification.
+    await modifySelectedFiles(selectedFilePaths, files);
+    await replaceFilesInIndexedDB("files", files, addLog);
   };
 
-  // Function to modify the selected files.
+  // Modify selected files.
   const modifySelectedFiles = async (selectedFilePaths: string[], files: FileWithDirectoryAndFileHandle[]) => {
     const filesToModify = files.filter((file) =>
       selectedFilePaths.includes(file.webkitRelativePath)
@@ -117,7 +117,7 @@ const CounterComponent = () => {
     for (const file of filesToModify) {
       if (file.handle) {
         const blob = new Blob(["Modified content " + new Date()]);
-        fileSave(blob, {}, file.handle); // Save the modified file using its handle.
+        fileSave(blob, {}, file.handle);
         addLog("log", `File modified: ${file.webkitRelativePath}`);
       } else {
         addLog("warn", `The file ${file.name} does not have an associated handle.`);
@@ -127,57 +127,35 @@ const CounterComponent = () => {
 
   return (
     <Box sx={{ maxWidth: 600, margin: "0 auto", padding: 2 }}>
-      <Typography variant="h4" align="center">
-        Upload and display files from a folder
+      <Typography variant="h4" align="center" sx={{ mb: 2, fontWeight: 'bold' }}>
+        File Management
       </Typography>
-      <Typography variant="h5" align="center">
-        browser-fs-access and idb-keyval
-      </Typography>
-      <Paper elevation={3} sx={{ padding: 2 }}>
+      <Paper elevation={1} sx={{ padding: 2, borderRadius: 2 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={handleFileUpload}
-            sx={{ mx: 1, minWidth: "120px" }}
-          >
+          <Button variant="contained" color="primary" onClick={handleFileUpload} sx={{ flex: 1, mx: 1 }}>
             Upload
           </Button>
-          <Button
-            variant="contained"
-            color="success"
-            size="small"
-            onClick={handleSaveToIndexedDB}
-            sx={{ mx: 1, minWidth: "120px" }}
-          >
+          <Button variant="contained" color="success" onClick={handleSaveToIndexedDB} sx={{ flex: 1, mx: 1 }}>
             Save
           </Button>
           <Button
             variant="contained"
             color="secondary"
-            size="small"
             onClick={handleModifyFiles}
-            sx={{ mx: 1, minWidth: "120px" }}
+            sx={{ flex: 1, mx: 1 }}
             disabled={selectedFiles.size === 0}
           >
             Modify
           </Button>
-          <Button
-            variant="contained"
-            color="error"
-            size="small"
-            onClick={handleResetFiles}
-            sx={{ mx: 1, minWidth: "120px" }}
-          >
+          <Button variant="contained" color="error" onClick={handleResetFiles} sx={{ flex: 1, mx: 1 }}>
             Reset
           </Button>
         </Box>
-        <Box mt={4}>
-          <Typography variant="h6">Files in the folder:</Typography>
+        <Box mt={2}>
+          <Typography variant="h6" sx={{ mb: 1 }}>Files:</Typography>
           {files.length > 0 ? (
-            <List>
-              {files.map((file, index) => (
+            <List sx={{ padding: 0 }}>
+              {files.map((file) => (
                 <ListItem key={file.webkitRelativePath} sx={{ paddingLeft: 0 }}>
                   <Checkbox
                     checked={selectedFiles.has(file.webkitRelativePath)}
@@ -186,10 +164,8 @@ const CounterComponent = () => {
                   <Typography 
                     variant="body1" 
                     sx={{ 
-                      fontWeight: 'bold',
-                      color: 'primary.main',
-                      fontSize: '1rem',
-                      textDecoration: selectedFiles.has(file.webkitRelativePath) ? 'underline' : 'none',
+                      fontWeight: selectedFiles.has(file.webkitRelativePath) ? 'bold' : 'normal',
+                      color: selectedFiles.has(file.webkitRelativePath) ? 'primary.main' : 'text.primary',
                     }}
                   >
                     {file.webkitRelativePath || file.name}
@@ -198,7 +174,7 @@ const CounterComponent = () => {
               ))}
             </List>
           ) : (
-            <Typography variant="body1" color="textSecondary" sx={{ fontStyle: 'italic', fontSize: '1.2rem' }}>
+            <Typography variant="body1" color="textSecondary" sx={{ fontStyle: 'italic' }}>
               No files uploaded or existing files have been deleted from IndexedDB.
             </Typography>
           )}
